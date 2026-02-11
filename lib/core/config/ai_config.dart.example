@@ -1,0 +1,28 @@
+/// Configuración de proveedores de IA
+enum AIProvider {
+  /// MockAIService - respuestas predefinidas para testing
+  mock,
+  
+  /// Groq API - IA real con LLaMA 3.3 70B
+  groq,
+}
+
+/// Configuración global de IA
+class AIConfig {
+  /// Proveedor actual (cambiar aquí para switchear)
+  static const provider = AIProvider.mock;
+  
+  /// API Key de Groq (NUNCA subir a git)
+  /// Obtener en: https://console.groq.com/keys
+  /// 
+  /// INSTRUCCIONES:
+  /// 1. Copia este archivo a 'ai_config.dart' (sin el .example)
+  /// 2. Reemplaza 'YOUR_GROQ_API_KEY_HERE' con tu key real
+  /// 3. El archivo 'ai_config.dart' está en .gitignore (no se subirá)
+  static const groqApiKey = 'YOUR_GROQ_API_KEY_HERE';
+  
+  /// Modelo de Groq a usar
+  static const groqModel = 'llama-3.3-70b-versatile';
+  
+  AIConfig._(); // Constructor privado - clase estática
+}

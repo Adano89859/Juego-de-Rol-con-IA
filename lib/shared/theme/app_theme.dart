@@ -31,11 +31,11 @@ class AppTheme {
       textTheme: GoogleFonts.merriweatherTextTheme(
         ThemeData.dark().textTheme,
       ),
-      cardTheme: CardTheme(
-        color: const Color(0xFF16213E),
-        elevation: 4,
+      // DESPUÉS:
+      cardTheme: const CardThemeData(
+        elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -85,10 +85,10 @@ class AppTheme {
       textTheme: GoogleFonts.merriweatherTextTheme(
         ThemeData.light().textTheme,
       ),
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.all(Radius.circular(16)),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(

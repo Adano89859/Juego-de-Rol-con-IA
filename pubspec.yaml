@@ -1,5 +1,5 @@
 name: quest_master
-description: "Quest Master - Infinite narrative RPG powered by local AI (Ollama)"
+description: "Quest Master - Infinite narrative RPG powered by AI"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -9,27 +9,26 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  # State Management - Riverpod
-  # Chosen over BLoC for this project because:
-  # 1. Deeply nested game state benefits from granular providers
-  # 2. Async providers for AI calls
-  # 3. Provider overrides for testing with MockAI
-  # 4. No boilerplate events/states classes needed
+  
+  # State Management
   flutter_riverpod: ^2.6.1
-
+  
   # Local Storage
   shared_preferences: ^2.3.4
   path_provider: ^2.1.5
-
-  # Networking (Ollama REST API)
+  
+  # Networking (AI API)
   http: ^1.2.2
-
+  
+  # Firebase para Multiplayer
+  firebase_core: ^3.8.1
+  firebase_database: ^11.3.4
+  
   # Utilities
   uuid: ^4.5.1
   equatable: ^2.0.7
   collection: ^1.19.0
-
+  
   # UI
   google_fonts: ^6.2.1
 

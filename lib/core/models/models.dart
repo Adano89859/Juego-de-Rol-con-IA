@@ -5,3 +5,4 @@ export 'game_item.dart';
 export 'game_state.dart';
 export 'location.dart';
 export 'prefab.dart';
+export 'region.dart';

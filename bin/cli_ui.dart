@@ -239,28 +239,42 @@ class CliUI {
   /// Print a help screen with all commands.
   static void printHelp() {
     printSeparator();
-    print('${Ansi.bold}  📜 COMANDOS${Ansi.reset}');
+    print('${Ansi.bold}  📜 COMANDOS DISPONIBLES${Ansi.reset}');
+    printSeparator();
+    
+    print('${Ansi.bold}  BÁSICOS:${Ansi.reset}');
+    print('    ${Ansi.brightCyan}help, ayuda, ?${Ansi.reset}       Mostrar esta ayuda');
+    print('    ${Ansi.brightCyan}inv, inventario, i${Ansi.reset}   Ver tu inventario');
+    print('    ${Ansi.brightCyan}stats, estado${Ansi.reset}        Ver tus estadísticas');
+    print('    ${Ansi.brightCyan}equip <item>${Ansi.reset}         Equipar/desequipar un objeto');
+    print('');
+    
+    print('${Ansi.bold}  PARTIDA:${Ansi.reset}');
+    print('    ${Ansi.brightCyan}save <nombre>${Ansi.reset}        Guardar partida');
+    print('    ${Ansi.brightCyan}load <nombre>${Ansi.reset}        Cargar partida');
+    print('    ${Ansi.brightCyan}quit, salir, exit${Ansi.reset}    Salir del juego');
+    print('');
+    
+    print('${Ansi.bold}  INTELIGENCIA ARTIFICIAL:${Ansi.reset}');
+    print('    ${Ansi.brightCyan}provider${Ansi.reset}             Ver proveedor de IA actual');
+    print('    ${Ansi.brightCyan}switch mock${Ansi.reset}          Cambiar a Mock AI (respuestas predefinidas)');
+    print('    ${Ansi.brightCyan}switch groq${Ansi.reset}          Cambiar a Groq AI (narrativa real con IA)');
+    print('');
+    
+    print('${Ansi.bold}  AVANZADOS:${Ansi.reset}');
+    print('    ${Ansi.brightCyan}mision <texto>${Ansi.reset}       Cambiar misión principal');
+    print('    ${Ansi.brightCyan}contexto, context${Ansi.reset}    Ver el prompt enviado a la IA');
+    print('    ${Ansi.brightCyan}debug items${Ansi.reset}          Obtener items mágicos de prueba');
+    print('    ${Ansi.brightCyan}resumir${Ansi.reset}              Forzar resumen de historia');
+    print('');
+    
     printThinSeparator();
-    print('  ${Ansi.brightCyan}inv${Ansi.reset} / ${Ansi.brightCyan}inventario${Ansi.reset}'
-        '    Ver inventario');
-    print('  ${Ansi.brightCyan}stats${Ansi.reset}'
-        '               Ver estadísticas del personaje');
-    print('  ${Ansi.brightCyan}equip${Ansi.reset} ${Ansi.gray}<nombre>${Ansi.reset}'
-        '      Equipar/desequipar item');
-    print('  ${Ansi.brightCyan}mision${Ansi.reset} ${Ansi.gray}<texto>${Ansi.reset}'
-        '     Cambiar misión principal');
-    print('  ${Ansi.brightCyan}resumir${Ansi.reset}'
-        '             Forzar resumen de historia');
-    print('  ${Ansi.brightCyan}contexto${Ansi.reset}'
-        '            Ver prompt que se envía a la IA');
-    print('  ${Ansi.brightCyan}debug items${Ansi.reset}'
-        '         Darte items de visión (debug)');
-    print('  ${Ansi.brightCyan}help${Ansi.reset}'
-        '                Mostrar esta ayuda');
-    print('  ${Ansi.brightCyan}quit${Ansi.reset} / ${Ansi.brightCyan}salir${Ansi.reset}'
-        '         Salir del juego');
-    printThinSeparator();
-    print('${Ansi.dim}  Cualquier otro texto se envía como acción del jugador.${Ansi.reset}');
+    print('${Ansi.bold}  JUEGO LIBRE:${Ansi.reset}');
+    print('${Ansi.dim}    Escribe cualquier acción y la IA responderá.${Ansi.reset}');
+    print('${Ansi.dim}    Ejemplos:${Ansi.reset}');
+    print('${Ansi.dim}      > hablo con el posadero sobre las desapariciones${Ansi.reset}');
+    print('${Ansi.dim}      > examino la habitación en busca de pistas${Ansi.reset}');
+    print('${Ansi.dim}      > intento convencer al guardia para que me deje pasar${Ansi.reset}');
     printSeparator();
   }
 

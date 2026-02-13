@@ -82,7 +82,7 @@ class ContextManager {
     // 8. Response instructions
     buffer.writeln(
       '\n[INSTRUCCION]: Narra el resultado de la accion. '
-      'Se descriptivo pero conciso (max 3 parrafos). '
+      'Se descriptivo pero conciso. '
       'Incluye consecuencias y cambios en el mundo.',
     );
 
@@ -154,13 +154,46 @@ class ContextManager {
   // ── Private Helpers ──
 
   String _buildSystemInstructions(GameState state) {
-    return 'Eres el narrador de una aventura de rol en era ${state.era}. '
-        'Narra en segunda persona. Se creativo y descriptivo. '
-        'El jugador puede hacer CUALQUIER accion. '
-        'Adapta el mundo organicamente a sus decisiones. '
-        'NO muestres numeros ni estadisticas en la narrativa. '
-        'Describe efectos de forma narrativa '
-        '(ej: "te sientes debil" en vez de "-20 HP").';
+    final player = state.player;
+    final playerInfo = [
+      'Nombre: ${player.name}',
+      if (player.characterClass != null) 'Clase: ${player.characterClass}',
+      if (player.appearance != null) 'Apariencia: ${player.appearance}',
+      if (player.personality != null) 'Personalidad: ${player.personality}',
+      if (player.backstory != null) 'Historia: ${player.backstory}',
+    ].join(' | ');
+    
+    return '''Eres el narrador de una aventura interactiva en era ${state.era}.
+
+PERSONAJE:
+$playerInfo
+
+OBJETIVO:
+${state.mainQuest ?? 'El jugador está descubriendo su camino'}
+
+═══════════════════════════════════════════════════════════════════
+
+REGLAS:
+
+- No narres acciones del jugador. Solo el jugador decide sus acciones, diálogos y pensamientos.
+  Ejemplo: Si dice "miro alrededor" → tú narras lo que ve, no que "camina hacia la ventana"
+
+- Narra solo las consecuencias de lo que el jugador hace
+
+- NPCs tienen vida propia: motivaciones, memoria, reacciones propias
+
+- Consecuencias realistas y proporcionales
+
+- Creatividad libre para inventar NPCs, lugares y eventos
+
+- Menciona el objetivo solo cuando sea natural
+
+- No ofrezcas opciones ni guíes al jugador
+
+- Completa siempre tus frases, no cortes a mitad de pensamiento
+
+Solo narra lo que ocurre tras la acción del jugador.
+''';
   }
 
   String _buildKeyFacts(List<String> facts) {

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="Quest Master - RPG narrativo con IA">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="Quest Master">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <title>Quest Master</title>
+  <link rel="manifest" href="manifest.json">
+  
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #16213e;
+    }
+  </style>
+</head>
+<body>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  
+  <script>
+    // Tu configuración de Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyC8cCoSjRFpORkxKGz3tp-hy9AAWcmpQ",
+      authDomain: "quest-master-8d028.firebaseapp.com",
+      projectId: "quest-master-8d028",
+      databaseURL: "https://quest-master-8d028-default-rtdb.firebaseio.com",
+      storageBucket: "quest-master-8d028.firebasestorage.app",
+      messagingSenderId: "1087677555780",
+      appId: "1:1087677555780:web:ae3ca06b566a7b521c4811"
+    };
+    
+    // Inicializar Firebase
+    firebase.initializeApp(firebaseConfig);
+  </script>
+  
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

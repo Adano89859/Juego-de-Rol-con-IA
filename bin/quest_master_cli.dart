@@ -10,7 +10,6 @@ import 'dart:convert';
 import 'package:quest_master/core/constants/game_constants.dart';
 import 'package:quest_master/core/models/models.dart';
 import 'package:quest_master/core/services/context_manager.dart';
-import 'package:quest_master/core/services/mock_ai_service.dart';
 import 'package:quest_master/core/services/ai_service.dart';
 import 'package:quest_master/core/config/ai_config.dart';
 import 'package:quest_master/core/services/ai_service_factory.dart';
@@ -18,6 +17,7 @@ import 'package:quest_master/core/utils/vision_system.dart';
 import 'package:uuid/uuid.dart';
 
 import 'cli_ui.dart';
+import 'character_wizard.dart';
 
 const _uuid = Uuid();
 
@@ -50,8 +50,45 @@ class QuestMasterCLI {
 
   static const _saveDir = 'cli_saves';
 
+  /// Select AI provider at startup
+  Future<AIProvider> _selectProvider() async {
+    print('');
+    CliUI.printInfo('¿Qué proveedor de IA deseas usar?');
+    print('${Ansi.cyan}  1.${Ansi.reset} Mock AI ${Ansi.gray}(respuestas predefinidas, rápido)${Ansi.reset}');
+    print('${Ansi.cyan}  2.${Ansi.reset} Groq AI ${Ansi.gray}(narrativa real con IA, requiere conexión)${Ansi.reset}');
+    stdout.write('${Ansi.brightYellow}Opción (1-2):${Ansi.reset} ');
+    
+    final choice = stdin.readLineSync()?.trim() ?? '1';
+    
+    if (choice == '2') {
+      try {
+        // Test Groq connection
+        final testService = createAIService(provider: AIProvider.groq);
+        CliUI.printInfo('Probando conexión con Groq...');
+        final available = await testService.isAvailable();
+        if (available) {
+          CliUI.printSuccess('✓ Conectado a Groq AI');
+          return AIProvider.groq;
+        } else {
+          CliUI.printError('No se pudo conectar a Groq. Usando Mock AI.');
+          return AIProvider.mock;
+        }
+      } catch (e) {
+        CliUI.printError('Error: $e');
+        CliUI.printInfo('Usando Mock AI por defecto.');
+        return AIProvider.mock;
+      }
+    }
+    
+    return AIProvider.mock;
+  }
+
   Future<void> run() async {
-    // Initialize AI service
+    _showHeader();
+    
+    // Select AI provider first
+    _currentProvider = await _selectProvider();
+    
     try {
       _aiService = createAIService(provider: _currentProvider);
     } catch (e) {
@@ -61,28 +98,49 @@ class QuestMasterCLI {
       _aiService = createAIService(provider: _currentProvider);
     }
 
-    _showHeader();
+    print('');
+    print('${Ansi.cyan}Provider: ${getProviderName(_currentProvider)}${Ansi.reset}\n');
 
-    // Ask for player name
-    stdout.write('${Ansi.brightYellow}  Nombre de tu personaje '
-        '${Ansi.gray}[Aventurero]${Ansi.brightYellow}: ${Ansi.reset}');
-    final nameInput = stdin.readLineSync()?.trim() ?? '';
-    final playerName = nameInput.isEmpty ? 'Aventurero' : nameInput;
+    // Run character creation wizard
+    final player = await CharacterWizard.create();
+    
+    // Generate initial objective based on character
+    CliUI.printInfo('Generando tu objetivo inicial...');
+    final goal = await _generateInitialGoal(player);
 
-    // Initialize game state (reusing existing models)
-    _state = _createInitialState(playerName);
+    // Initialize game state with created character
+    _state = _createInitialState(player, goal);
 
-    CliUI.printInfo('Iniciando aventura como $playerName...');
+    CliUI.printSuccess('¡Aventura iniciada!');
+    print('');
+
+    // Show character summary
+    _printCharacterSummary();
     print('');
 
     // Show initial status
     _printStatus();
 
-    // Show the opening narrative
-    CliUI.printNarrative(
-      _state.currentLocation.description ??
-          'Tu aventura comienza en un lugar misterioso...',
-    );
+    // Show the opening narrative with objective
+    CliUI.printSeparator();
+    print('${Ansi.brightCyan}${Ansi.bold}  TU HISTORIA COMIENZA${Ansi.reset}');
+    CliUI.printSeparator();
+    print('');
+    CliUI.printInfo('Objetivo: $goal');
+    print('');
+    
+    // Generate creative opening scene
+    if (_currentProvider == AIProvider.groq) {
+      CliUI.printInfo('La IA está creando tu historia inicial...');
+      final openingScene = await _generateCreativeOpening(player);
+      print('');
+      CliUI.printNarrative(openingScene);
+    } else {
+      // Mock fallback
+      CliUI.printNarrative(
+        'Tu aventura comienza. El objetivo es claro: $goal',
+      );
+    }
 
     // Main game loop
     await _gameLoop();
@@ -91,7 +149,6 @@ class QuestMasterCLI {
   void _showHeader() {
     print('\n' * 2);
     CliUI.printBanner();
-    print('${Ansi.cyan}Provider: ${getProviderName(_currentProvider)}${Ansi.reset}\n');
   }
 
   Future<void> _gameLoop() async {
@@ -196,7 +253,8 @@ class QuestMasterCLI {
           try {
             _aiService = createAIService(provider: _currentProvider);
             CliUI.printSuccess('✓ Cambiado a Mock AI (respuestas predefinidas)');
-            _showHeader();
+            print('');
+            print('${Ansi.cyan}Provider: ${getProviderName(_currentProvider)}${Ansi.reset}\n');
           } catch (e) {
             CliUI.printError('Error al cambiar: $e');
           }
@@ -206,13 +264,15 @@ class QuestMasterCLI {
             _aiService = createAIService(provider: _currentProvider);
             CliUI.printSuccess('✓ Cambiado a Groq AI (narrativa real)');
             CliUI.printInfo('Conectando con Groq... primera respuesta puede tardar un poco.');
-            _showHeader();
+            print('');
+            print('${Ansi.cyan}Provider: ${getProviderName(_currentProvider)}${Ansi.reset}\n');
           } catch (e) {
             CliUI.printError('Error: $e');
             CliUI.printError('Volviendo a Mock AI...');
             _currentProvider = AIProvider.mock;
             _aiService = createAIService(provider: _currentProvider);
-            _showHeader();
+            print('');
+            print('${Ansi.cyan}Provider: ${getProviderName(_currentProvider)}${Ansi.reset}\n');
           }
         } else {
           CliUI.printError('Proveedor desconocido. Usa: mock o groq');
@@ -251,7 +311,10 @@ class QuestMasterCLI {
 
     try {
       // Get AI response
-      final response = await _aiService.narrate(prompt: prompt);
+      final response = await _aiService.narrate(
+        prompt: prompt,
+        maxTokens: 1000,
+      );
 
       CliUI.clearThinking();
 
@@ -631,40 +694,96 @@ class QuestMasterCLI {
     return keywords.any((k) => text.contains(k));
   }
 
-  GameState _createInitialState(String playerName) {
+  /// Generate initial goal based on character backstory
+  Future<String> _generateInitialGoal(Character player) async {
+    try {
+      final prompt = '''
+Genera un objetivo narrativo para una aventura (1 frase).
+
+PERSONAJE:
+- ${player.name}, ${player.characterClass ?? 'Aventurero'}
+- Historia: ${player.backstory ?? 'Sin historia'}
+
+Debe ser un problema del mundo (robo, amenaza, misterio), concreto y urgente.
+Puede conectar con el trasfondo del personaje.
+
+Ejemplo: "El Cristal Lunar fue robado. Recupéralo antes de que desate una maldición"
+''';
+      
+      final response = await _aiService.narrate(prompt: prompt, maxTokens: 100);
+      return response.narrative.trim();
+    } catch (e) {
+      return 'Un misterioso robo amenaza la región. Investiga antes de que sea tarde';
+    }
+  }
+
+  /// Generate creative opening scene based on character
+  Future<String> _generateCreativeOpening(Character player) async {
+    try {
+      final prompt = '''
+Crea el inicio de una aventura original para este personaje.
+
+PERSONAJE:
+${player.name}, ${player.characterClass ?? 'Aventurero'}
+Historia: ${player.backstory ?? 'Sin historia'}
+Personalidad: ${player.personality ?? 'Equilibrado'}
+
+OBJETIVO: ${_state.mainQuest}
+
+REGLAS:
+- No uses clichés como encrucijadas o 4 caminos
+- Sitúa al personaje en contexto del objetivo
+- No narres sus acciones, solo la situación
+- Creatividad total en formato
+
+Ejemplo: "Despiertas en una posada. Gritos afuera. Alguien grita sobre un robo en el templo."
+''';
+
+      final response = await _aiService.narrate(
+        prompt: prompt,
+        maxTokens: 1000,
+      );
+      
+      return response.narrative.trim();
+    } catch (e) {
+      return 'Tu aventura comienza. El objetivo es claro: ${_state.mainQuest}';
+    }
+  }
+
+  /// Print character summary
+  void _printCharacterSummary() {
+    final player = _state.player;
+    print('${Ansi.brightCyan}╔${'═' * 78}╗${Ansi.reset}');
+    print('${Ansi.brightCyan}║${Ansi.reset} ${Ansi.bold}${player.name}${Ansi.reset} - ${Ansi.cyan}${player.characterClass ?? 'Aventurero'}${Ansi.reset}');
+    print('${Ansi.brightCyan}╠${'═' * 78}╣${Ansi.reset}');
+    if (player.appearance != null) {
+      print('${Ansi.brightCyan}║${Ansi.reset} ${Ansi.gray}Apariencia:${Ansi.reset} ${player.appearance}');
+    }
+    if (player.personality != null) {
+      print('${Ansi.brightCyan}║${Ansi.reset} ${Ansi.gray}Personalidad:${Ansi.reset} ${player.personality}');
+    }
+    if (player.backstory != null) {
+      print('${Ansi.brightCyan}║${Ansi.reset} ${Ansi.gray}Historia:${Ansi.reset} ${player.backstory}');
+    }
+    print('${Ansi.brightCyan}╚${'═' * 78}╝${Ansi.reset}');
+  }
+
+  GameState _createInitialState(Character player, String goal) {
     final now = DateTime.now();
     return GameState(
-      player: Character(
-        id: _uuid.v4(),
-        name: playerName,
-        description: 'Un aventurero en busca de su destino',
-        health: GameConstants.defaultHealth,
-        maxHealth: GameConstants.defaultMaxHealth,
-        attack: GameConstants.defaultAttack,
-        defense: GameConstants.defaultDefense,
-        speed: GameConstants.defaultSpeed,
-        luck: GameConstants.defaultLuck,
-        mana: GameConstants.defaultMana,
-        maxMana: GameConstants.defaultMaxMana,
-        createdAt: now,
-      ),
+      player: player,
       currentLocation: Location(
         id: _uuid.v4(),
-        name: 'Encrucijada del Destino',
-        description:
-            'Te encuentras en un cruce de caminos donde tres senderos convergen. '
-            'Un viejo poste de madera señala direcciones apenas legibles. '
-            'Al norte, un bosque denso y oscuro. Al este, las torres de una ciudad lejana. '
-            'Al sur, el humo de una aldea se eleva entre las colinas. '
-            'El viento sopla suavemente, trayendo aromas de lugares lejanos y promesas de aventura.',
-        atmosphere: 'Tranquilo pero lleno de posibilidades',
+        name: 'Punto de Inicio',
+        description: null,  // La IA generará la descripción
+        atmosphere: 'Expectante',
         era: 'medieval',
         dangerLevel: 1,
         createdAt: now,
       ),
       era: 'medieval',
-      mainQuest: 'Descubre tu destino en este mundo',
-      keyFacts: ['Inicio de la aventura en la Encrucijada del Destino'],
+      mainQuest: goal,
+      keyFacts: [goal],
     );
   }
 }

@@ -10,6 +10,7 @@ class Character extends Equatable {
   final String id;
   final String name;
   final String? title; // "the Redeemer", "Shadow King"
+  final String? characterClass; // "Mago", "Guerrero", "Pícaro", etc.
 
   // ── Stats (hidden by default) ──
   final int health;
@@ -75,6 +76,7 @@ class Character extends Equatable {
     required this.id,
     required this.name,
     this.title,
+    this.characterClass,
     this.health = GameConstants.defaultHealth,
     this.maxHealth = GameConstants.defaultMaxHealth,
     this.attack = GameConstants.defaultAttack,
@@ -132,6 +134,7 @@ class Character extends Equatable {
   /// Compact representation for AI context (minimal tokens).
   String toContextString() {
     final parts = <String>[name];
+    if (characterClass != null) parts.add('[$characterClass]');
     if (title != null) parts.add('($title)');
     parts.add('HP:$health/$maxHealth ATK:$attack DEF:$defense');
     if (abilities.isNotEmpty) {
@@ -145,6 +148,7 @@ class Character extends Equatable {
     String? id,
     String? name,
     String? title,
+    String? characterClass,
     int? health,
     int? maxHealth,
     int? attack,
@@ -182,6 +186,7 @@ class Character extends Equatable {
       id: id ?? this.id,
       name: name ?? this.name,
       title: title ?? this.title,
+      characterClass: characterClass ?? this.characterClass,
       health: health ?? this.health,
       maxHealth: maxHealth ?? this.maxHealth,
       attack: attack ?? this.attack,
@@ -221,6 +226,7 @@ class Character extends Equatable {
         'id': id,
         'name': name,
         'title': title,
+        'characterClass': characterClass,
         'health': health,
         'maxHealth': maxHealth,
         'attack': attack,
@@ -259,6 +265,7 @@ class Character extends Equatable {
         id: json['id'] as String,
         name: json['name'] as String,
         title: json['title'] as String?,
+        characterClass: json['characterClass'] as String?,
         health: json['health'] as int? ?? GameConstants.defaultHealth,
         maxHealth: json['maxHealth'] as int? ?? GameConstants.defaultMaxHealth,
         attack: json['attack'] as int? ?? GameConstants.defaultAttack,

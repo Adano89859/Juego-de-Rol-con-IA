@@ -47,7 +47,7 @@ class GroqAIService implements AIService {
   @override
   Future<AIResponse> narrate({
     required String prompt,
-    int maxTokens = 500,
+    int maxTokens = 1000,
   }) async {
     try {
       final response = await http
@@ -201,16 +201,16 @@ class GroqAIService implements AIService {
   // ── Helpers ──
   
   String get _narrativeSystemPrompt => '''
-Eres el narrador de "Quest Master", una aventura épica e interactiva.
+Eres el narrador de "Quest Master".
 
-REGLAS IMPORTANTES:
-1. Narra de forma épica, envolvente y descriptiva
-2. Valida si las acciones son físicamente posibles
-3. Si algo es imposible, explica por qué pero sugiere alternativas
-4. Mantén consistencia con la historia previa
-5. Genera consecuencias lógicas de las acciones
-6. Sé creativo pero realista dentro del mundo
-7. Responde en 2-4 párrafos máximo (sé conciso)
+REGLA IMPORTANTE:
+No narres acciones del jugador. Solo el jugador puede decidir sus acciones, diálogos y pensamientos.
+Tú narras las consecuencias de lo que el jugador hace.
+
+Ejemplo: Jugador dice "hablo con el anciano" → Tú: "El anciano levanta la vista. — '¿Qué necesitas?' — pregunta."
+
+Mantén consistencia, valida si las acciones son posibles, genera consecuencias lógicas.
+No cortes frases a la mitad.
 
 Responde SOLO con la narrativa, sin meta-comentarios.
 ''';
